@@ -37,27 +37,30 @@ for pg in pages:
     soup = bs(browser.html)
     s = soup.find_all('a', id="_job")
     for job in s:
-        job_id = job['href'].split('/')[-1]
-        apply_url = f'https://www.daijob.com/en/{config["userid"]}/members/application/apply/{job_id}'
-        go(apply_url)
-        if len(browser.forms) == 0:
-            print('Maybe already applied to job ' +job_id)
-            continue
+        try:
+            job_id = job['href'].split('/')[-1]
+            apply_url = f'https://www.daijob.com/en/{config["userid"]}/members/application/apply/{job_id}'
+            go(apply_url)
+            if len(browser.forms) == 0:
+                print('Maybe already applied to job ' +job_id)
+                continue
 
-        formclear('1')
-        fv('1','application[member_resume_en_id]', config["preferred_resume_id"])
-        submit('submit','1')
-        
-        ## do I need to insert wait here?
-        
-        ## check if url stays the same, if so, means there was some error
-        if(urllib.parse.unquote(browser.url) == apply_url):
-            print('Application failed to '+job_id)
+            formclear('1')
+            fv('1','application[member_resume_en_id]', config["preferred_resume_id"])
+            submit('submit','1')
+            
+            ## do I need to insert wait here?
+            
+            ## check if url stays the same, if so, means there was some error
+            if(urllib.parse.unquote(browser.url) == apply_url):
+                print('Application failed to '+job_id)
+                continue
+            ## else click on submit
+            submit('submit','1')
+            
+            if(urllib.parse.unquote(browser.url) == f'https://www.daijob.com/en/{config["userid"]}/members/application/save'):
+                print('Application submitted to '+job_id)
+            else:
+                print('Application failed to '+job_id)
+        except Exception:
             continue
-        ## else click on submit
-        submit('submit','1')
-        
-        if(urllib.parse.unquote(browser.url) == f'https://www.daijob.com/en/{config["userid"]}/members/application/save'):
-            print('Application submitted to '+job_id)
-        else:
-            print('Application failed to '+job_id)
